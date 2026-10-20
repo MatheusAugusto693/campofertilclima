@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#071a2d">
+<title>CampoFértil | Central Meteorológica</title>
+<style>
+:root{--bg:#071a2d;--panel:#102a43;--panel2:#153650;--text:#eef7ff;--muted:#a9c0d4;--blue:#50b8ff;--green:#52e0b2;--line:#294963;--yellow:#ffd166}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top right,#153e5c 0,#071a2d 48%,#061321 100%);color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;min-height:100vh}
+header{padding:28px max(20px,calc((100% - 1200px)/2));border-bottom:1px solid #294963;background:#061321aa}
+.brand{display:flex;gap:16px;align-items:center;flex-wrap:wrap}.logoCompany{display:flex;align-items:center;justify-content:center;background:#fff;border-radius:12px;padding:7px 10px;width:min(270px,48vw);min-width:170px;box-shadow:0 5px 18px #0002}.logoCompany img{display:block;width:100%;height:auto;object-fit:contain}.brandTitle{min-width:210px}.eyebrow{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--green);font-weight:800}h1{font-size:clamp(25px,4vw,38px);line-height:1.1;margin:3px 0}header p{margin:8px 0 0;color:var(--muted)}
+main{max-width:1200px;margin:auto;padding:25px 20px 50px}.toolbar{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;margin-bottom:18px}.field,.btn{border:1px solid var(--line);background:#0d253b;color:var(--text);border-radius:12px;padding:13px 14px;font:inherit;min-width:0}.field:focus{outline:2px solid var(--blue);outline-offset:1px}.btn{cursor:pointer;font-weight:750;background:#16466a}.btn:hover{filter:brightness(1.15)}.btn:disabled{opacity:.5;cursor:wait}
+.statusline{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:13px;margin:10px 2px 20px}.live{color:var(--green);font-weight:750}.dot{display:inline-block;width:8px;height:8px;background:var(--green);border-radius:50%;margin-right:7px;box-shadow:0 0 10px #52e0b277}
+.hero{display:grid;grid-template-columns:1.35fr 1fr;gap:16px}.panel{background:linear-gradient(145deg,#12314b,#0c2338);border:1px solid var(--line);border-radius:20px;padding:23px;box-shadow:0 12px 35px #0002}.location{color:var(--muted);font-size:14px}.city{font-size:clamp(24px,3vw,34px);font-weight:850;line-height:1.2;margin:4px 0}.tempRow{display:flex;align-items:center;gap:20px;margin-top:15px}.weatherIcon{font-size:55px;line-height:1}.temp{font-size:clamp(48px,7vw,70px);font-weight:800;letter-spacing:-.06em;line-height:1}.desc{color:var(--muted);margin-top:7px}.rainNum{font-size:clamp(40px,6vw,58px);font-weight:850;color:var(--blue);letter-spacing:-.05em;line-height:1.2}.rainNum small{font-size:17px;letter-spacing:0;color:var(--muted);font-weight:600}.rainLabel{font-weight:750;font-size:18px;margin-top:8px}.rainNote{color:var(--muted);font-size:13px;margin-top:9px}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0 22px}.metric{background:#0d253b;border:1px solid var(--line);border-radius:15px;padding:15px}.metric .label{color:var(--muted);font-size:13px}.metric .value{font-size:22px;font-weight:800;margin-top:4px}.sectionHead{display:flex;justify-content:space-between;align-items:end;gap:10px;flex-wrap:wrap;margin:28px 0 13px}.sectionHead h2{margin:0;font-size:21px}.sectionHead p{margin:2px 0 0;color:var(--muted);font-size:13px}.hourly{display:grid;grid-template-columns:repeat(8,minmax(85px,1fr));gap:9px;overflow-x:auto;padding-bottom:5px}.hour{border:1px solid var(--line);background:#0d253b;border-radius:13px;padding:13px 10px;text-align:center;min-width:85px}.hour .time{font-size:12px;color:var(--muted)}.hour .ico{font-size:24px;margin:8px 0}.hour .mm{font-weight:800;color:var(--blue)}.hour .degree{font-size:13px;margin-top:3px}
+.tableWrap{overflow:auto;border:1px solid var(--line);border-radius:15px}table{width:100%;border-collapse:collapse;min-width:540px;background:#0d253b}th,td{text-align:left;padding:13px 15px;border-bottom:1px solid var(--line)}th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}tr:last-child td{border-bottom:0}.badge{display:inline-block;padding:4px 9px;border-radius:99px;background:#123e5b;color:#8bd5ff;font-size:12px;font-weight:750}.error{background:#4b2430;border:1px solid #a64b5b;color:#ffe1e5;padding:14px;border-radius:12px;margin:14px 0;display:none}.loading{color:var(--yellow)}footer{max-width:1200px;margin:auto;padding:0 20px 35px;color:var(--muted);font-size:12px}footer a{color:#8bd5ff} .empty{color:var(--muted);padding:20px;text-align:center}
+
+.cityRow{cursor:pointer}.cityRow:hover{background:#153650}.cityName{font-weight:800;color:#eef7ff;background:none;border:0;padding:0;font:inherit;text-align:left;cursor:pointer}.conditionPill{display:inline-block;padding:4px 8px;border-radius:999px;background:#123e5b;color:#8bd5ff;font-size:12px;font-weight:750}.conditionPill.good{background:#153e32;color:#8af0c7}.conditionPill.bad{background:#4b2430;color:#ffc0c9}.conditionPill.mid{background:#493a1d;color:#ffe19a}
+@media(max-width:760px){.toolbar{grid-template-columns:1fr}.hero{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,1fr)}.panel{padding:18px}.hourly{grid-template-columns:repeat(8,85px)}}
+
+/* Identidade visual CampoFértil: verde institucional, marca d'água discreta e acabamento corporativo */
+:root{--bg:#071b14;--panel:#102b20;--panel2:#173d2b;--text:#f1f8f1;--muted:#b3c9b7;--blue:#8bd34a;--green:#a8e063;--line:#315641;--yellow:#f4d879}
+body{background:radial-gradient(ellipse at 90% 0%,#28583a 0%,#102d20 35%,#071b14 75%,#06140e 100%);position:relative;isolation:isolate}
+body:before{content:"";position:fixed;z-index:-1;pointer-events:none;inset:0;background-image:url('logo-campofertil.jpg');background-repeat:no-repeat;background-position:center 58%;background-size:min(72vw,850px) auto;opacity:.045;filter:grayscale(1);}
+header{position:relative;overflow:hidden;background:linear-gradient(105deg,#06170fef,#103622f2);border-bottom:3px solid #80bf3c;box-shadow:0 8px 30px #0003}
+header:after{content:"CAMPOFÉRTIL";position:absolute;right:3%;bottom:-26px;font-size:clamp(30px,6vw,74px);font-weight:900;letter-spacing:.12em;color:#d8f1d4;opacity:.035;pointer-events:none}
+.logoCompany{border:1px solid #dcebdc;border-radius:14px;padding:9px 12px;width:min(300px,48vw);box-shadow:0 8px 24px #0004}
+.eyebrow,.live{color:#a8e063}.dot{background:#a8e063;box-shadow:0 0 10px #a8e06366}
+.btn{background:linear-gradient(135deg,#397b32,#245c2d);border-color:#5c9d4a;box-shadow:0 4px 12px #0002}.btn:hover{filter:brightness(1.12)}
+.field{background:#0b2418;border-color:#385a40}.field:focus{outline-color:#a8e063}
+.panel{background:linear-gradient(145deg,#173c2aee,#0c251aee);border-color:#345d40;box-shadow:0 12px 35px #0003}
+.metric,.hour,table{background:#0b2418;border-color:#315641}.tableWrap{border-color:#315641}.cityRow:hover{background:#183d29}
+.badge,.conditionPill{background:#244c2e;color:#d0f0a4}.conditionPill.good{background:#174631;color:#a8e8bd}.conditionPill.bad{background:#4b2a26;color:#ffd0c4}.conditionPill.mid{background:#4a411d;color:#f5e5a0}
+.rainNum{color:#a8e063}.hour .mm{color:#b4e87b}footer{border-top:1px solid #315641;padding-top:20px;margin-top:15px}
+.brandStamp{display:flex;align-items:center;gap:12px;margin-bottom:12px;padding:10px 0;border-bottom:1px solid #315641}
+.brandStamp img{width:145px;height:auto;max-height:48px;object-fit:contain;background:#fff;padding:4px 7px;border-radius:7px}
+.brandStamp span{font-size:12px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+@media(max-width:600px){body:before{background-size:90vw auto;background-position:center 65%;opacity:.035}.logoCompany{width:min(260px,80vw)}.brandStamp{align-items:flex-start;flex-direction:column}}
+
+
+/* REDESIGN CORPORATIVO CAMPOFÉRTIL — interface clara, agrícola e responsiva */
+:root{--bg:#f2f6ef;--panel:#ffffff;--panel2:#f7faf5;--text:#203528;--muted:#637568;--blue:#287c39;--green:#438b2e;--line:#d8e4d4;--yellow:#9b7414}
+html{scroll-behavior:smooth}body{background:#f3f7f0;color:var(--text);font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif;line-height:1.55}
+body:before{position:fixed;inset:0;background-image: url('logo-campofertil.jpg');background-repeat:no-repeat;background-position:right 7% bottom 8%;background-size:min(44vw,560px) auto;opacity:.035;filter:none;z-index:-1}
+header{padding:22px max(20px,calc((100% - 1240px)/2)) 27px;background:linear-gradient(115deg,#ffffff 0%,#f7fbf4 68%,#edf6e8 100%);border-bottom:4px solid #36843b;box-shadow:0 4px 20px #16391a0c;color:#203528}
+.brand{gap:24px}.logoCompany{background:#fff;border:1px solid #e4ebdf;border-radius:10px;padding:10px 14px;width:min(275px,42vw);min-width:175px;box-shadow:0 5px 20px #234b2510}.brandTitle{min-width:240px}.eyebrow{color:#438b2e;font-size:11px;letter-spacing:.14em}h1{font-size:clamp(26px,3.6vw,40px);letter-spacing:-.035em;color:#174c2b;margin:5px 0 3px}header p{color:#617266}.headerIntro{margin-top:22px!important;padding-top:17px;border-top:1px solid #dce8d7;max-width:900px;font-size:15px}
+main{max-width:1240px;padding:25px 20px 48px}.toolbar{gap:10px}.field,.btn{border-radius:10px;padding:12px 14px;min-height:47px}.field{background:#fff;color:#24382a;border-color:#d4e1d0;box-shadow:0 2px 5px #203d1b05}.field::placeholder{color:#849487}.field:focus{outline:3px solid #b7dba8;outline-offset:1px;border-color:#438b2e}.btn{background:#27753a;color:#fff;border-color:#27753a;font-weight:750;box-shadow:0 4px 10px #21652d18;transition:transform .15s,background .15s}.btn:hover{background:#1d602f;filter:none;transform:translateY(-1px)}.btn:disabled{background:#8ca58e;border-color:#8ca58e}
+.statusline{color:#66786a;margin:13px 2px 19px}.live{color:#347a37}.dot{background:#58a63e;box-shadow:0 0 0 4px #58a63e1a}.error{background:#fff1ef;border:1px solid #e8b9b1;color:#8a3026;border-radius:10px}
+.hero{grid-template-columns:1.25fr .9fr;gap:18px}.panel{background:#fff;border:1px solid #dce7d8;border-radius:16px;padding:24px;box-shadow:0 7px 24px #234b2510}.location{color:#6b7d6e;font-size:12px;font-weight:750;letter-spacing:.045em}.city{color:#174c2b;font-size:clamp(25px,3vw,36px);letter-spacing:-.025em}.tempRow{gap:18px}.weatherIcon{font-size:53px}.temp{color:#214b2d}.desc{color:#657768}.rainNum{color:#287c39;font-size:clamp(43px,6vw,60px)}.rainNum small{color:#718073}.rainLabel{color:#244d2d}.rainNote{color:#738175;line-height:1.55}
+.metrics{gap:13px;margin:17px 0 25px}.metric{background:#fff;border:1px solid #dce7d8;border-radius:13px;padding:16px;box-shadow:0 4px 15px #234b2508}.metric .label{color:#6a7b6d}.metric .value{color:#214b2d;font-size:23px}.sectionHead{margin:29px 0 14px;align-items:center}.sectionHead h2{color:#1b512d;font-size:21px;letter-spacing:-.02em}.sectionHead p{color:#718073}.badge{background:#e9f4e4;color:#2c7133;border:1px solid #d4e8ca;padding:5px 10px}.hourly{gap:10px}.hour{background:#fff;border:1px solid #dce7d8;border-radius:12px;box-shadow:0 3px 10px #234b2507}.hour .time{color:#6c7b6e}.hour .mm{color:#287c39}.hour .degree{color:#344b39}
+.tableWrap{border:1px solid #d7e3d2;border-radius:13px;box-shadow:0 5px 17px #234b2508}table{background:#fff;color:#2a3c2e}th,td{border-bottom:1px solid #e5ede1;padding:14px 15px}th{background:#f1f7ed;color:#627663;font-size:11px}tbody tr:hover{background:#f6faf3}.cityRow:hover{background:#f0f7eb}.cityName{color:#246c32}.conditionPill{background:#e9f4e4;color:#2b7133}.conditionPill.good{background:#e1f3e4;color:#226b36}.conditionPill.bad{background:#fff0ec;color:#a44332}.conditionPill.mid{background:#fff6dd;color:#87651b}.empty{color:#7a897d}
+footer{max-width:none;margin:0;padding:23px max(20px,calc((100% - 1240px)/2)) 30px;background:#173e28;color:#d7e7d5;font-size:12px;border-top:4px solid #76ad3d}footer a{color:#c2e89a}.brandStamp{border-bottom:1px solid #42634a;padding:0 0 17px;margin-bottom:16px}.brandStamp img{width:165px;max-height:55px;background:#fff;border-radius:7px;padding:5px 8px}.brandStamp span{color:#d7e7d5;letter-spacing:.04em}.brandStamp strong{color:#c2e89a;letter-spacing:.09em}
+@media(max-width:760px){header{padding:18px 16px 22px}.brand{gap:14px}.logoCompany{width:min(235px,75vw);min-width:0}.brandTitle{min-width:0}.hero{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.panel{padding:18px}.toolbar{grid-template-columns:1fr}.headerIntro{margin-top:16px!important}.sectionHead h2{font-size:19px}body:before{background-size:80vw auto;background-position:center 65%;opacity:.025}footer{padding:22px 18px 28px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important}}
+
+</style>
+</head>
+<body>
+<header><div class="brand"><div class="logoCompany"><img src="logo-campofertil.jpg" alt="Logo CampoFértil"></div><div class="brandTitle"><div class="eyebrow">CAMPOFÉRTIL AGRONEGÓCIOS · PAINEL INTERNO</div><h1>Central Meteorológica</h1><p>Informação climática para apoiar o planejamento no campo.</p></div></div><p class="headerIntro">Acompanhe precipitação estimada, condições atuais e previsão dos municípios brasileiros em um só lugar.</p></header>
+<main>
+  <div class="toolbar">
+    <input class="field" id="search" list="citySuggestions" placeholder="🔎 Buscar cidade (ex.: Cascavel)" autocomplete="off" aria-label="Buscar cidade">
+    <datalist id="citySuggestions"></datalist>
+    <select class="field" id="state" aria-label="Filtrar por estado"><option value="">Todos os estados</option></select>
+    <button class="btn" id="refresh">↻ Atualizar agora</button>
+  </div>
+  <div class="statusline"><span id="loadStatus" class="loading">Carregando lista de municípios…</span><span><span class="dot"></span><span class="live">Atualização automática a cada 5 minutos</span></span></div>
+  <div class="error" id="errorBox" role="alert"></div>
+  <section class="hero">
+    <article class="panel">
+      <div class="location">CIDADE SELECIONADA</div><div class="city" id="cityName">Escolha uma cidade</div><div class="location" id="regionName">Brasil</div>
+      <div class="tempRow"><div class="weatherIcon" id="weatherIcon">🌦️</div><div><div class="temp" id="temperature">—°</div><div class="desc" id="weatherDesc">Aguardando dados meteorológicos</div></div></div>
+    </article>
+    <article class="panel">
+      <div class="location">PRECIPITAÇÃO ATUAL ESTIMADA</div><div class="rainNum"><span id="rainNow">—</span> <small>mm</small></div><div class="rainLabel" id="rainLabel">Chuva por hora</div><div class="rainNote">Precipitação indicada pelo modelo meteorológico para o horário atual. Pode diferir da medição de um pluviômetro local.</div>
+    </article>
+  </section>
+  <section class="metrics">
+    <div class="metric"><div class="label">Chuva na última hora*</div><div class="value" id="lastHour">— mm</div></div>
+    <div class="metric"><div class="label">Acumulado hoje</div><div class="value" id="todayRain">— mm</div></div>
+    <div class="metric"><div class="label">Probabilidade de chuva</div><div class="value" id="probability">—%</div></div>
+    <div class="metric"><div class="label">Vento</div><div class="value" id="wind">— km/h</div></div>
+  </section>
+  <div class="sectionHead"><div><h2>Previsão por hora</h2><p>Próximas horas — precipitação e temperatura estimadas</p></div><span class="badge" id="updatedAt">Sem atualização</span></div>
+  <div class="hourly" id="hourly"><div class="empty">Selecione uma cidade para ver a previsão.</div></div>
+  <div class="sectionHead"><div><h2>Próximos dias</h2><p>Resumo diário da precipitação prevista</p></div></div>
+  <div class="tableWrap"><table><thead><tr><th>Dia</th><th>Chuva prevista</th><th>Prob. máxima</th><th>Temperatura</th></tr></thead><tbody id="daily"><tr><td colspan="4" class="empty">Aguardando dados.</td></tr></tbody></table></div>
+  <div class="sectionHead"><div><h2>Cidades do Brasil</h2><p>Explore os municípios e consulte chuva, temperatura e condição do tempo. A lista é dividida em páginas para manter o site rápido.</p></div><span class="badge" id="cityPageInfo">Carregando municípios</span></div>
+  <div class="toolbar" style="grid-template-columns:1fr auto auto">
+    <input class="field" id="listSearch" placeholder="Filtrar cidades pelo nome..." aria-label="Filtrar tabela de cidades">
+    <select class="field" id="pageSize" aria-label="Quantidade de cidades por página"><option value="10">10 cidades</option><option value="20" selected>20 cidades</option><option value="50">50 cidades</option></select>
+    <button class="btn" id="loadPageWeather">Consultar clima desta página</button>
+  </div>
+  <div class="tableWrap"><table><thead><tr><th>Município</th><th>Estado</th><th>Condição</th><th>Temperatura</th><th>Chuva atual</th><th>Chuva prevista hoje</th></tr></thead><tbody id="cityTable"><tr><td colspan="6" class="empty">Carregando lista de municípios…</td></tr></tbody></table></div>
+  <div style="display:flex;justify-content:center;align-items:center;gap:12px;margin-top:14px;flex-wrap:wrap">
+    <button class="btn" id="prevPage">← Anterior</button><span id="pageLabel" style="color:var(--muted)">Página 1</span><button class="btn" id="nextPage">Próxima →</button>
+  </div>
+  <div class="sectionHead"><div><h2>Como os dados funcionam</h2><p>Transparência sobre a atualização</p></div></div>
+  <article class="panel"><p><strong>Atualização:</strong> o site consulta os serviços meteorológicos ao abrir e repete a consulta a cada 5 minutos enquanto a página estiver aberta.</p><p><strong>Importante:</strong> “a cada 5 minutos” é a frequência de consulta do site, não uma garantia de que o modelo meteorológico seja recalculado nesse intervalo. Os dados são estimativas do Open-Meteo e podem ter atraso ou diferir da chuva medida no local. A chuva da última hora é calculada a partir dos valores horários disponíveis e não substitui uma estação pluviométrica.</p><p><strong>Municípios:</strong> a lista é carregada da API pública do IBGE. É necessária conexão com a internet para buscar cidades e dados meteorológicos.</p></article>
+</main>
+<footer><div class="brandStamp"><img src="logo-campofertil.jpg" alt="CampoFértil"><span><strong>CAMPOFÉRTIL AGRONEGÓCIOS</strong><br>Central meteorológica · Informação para o campo</span></div>Fontes: <a href="https://servicodados.ibge.gov.br/api/docs/localidades" target="_blank" rel="noreferrer">API de localidades do IBGE</a> · <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">Open-Meteo</a>. Este painel é informativo e não substitui alertas oficiais da Defesa Civil ou do INMET.</footer>
+<script>
+const $ = id => document.getElementById(id);
+const states = {AC:"Acre",AL:"Alagoas",AP:"Amapá",AM:"Amazonas",BA:"Bahia",CE:"Ceará",DF:"Distrito Federal",ES:"Espírito Santo",GO:"Goiás",MA:"Maranhão",MT:"Mato Grosso",MS:"Mato Grosso do Sul",MG:"Minas Gerais",PA:"Pará",PB:"Paraíba",PR:"Paraná",PE:"Pernambuco",PI:"Piauí",RJ:"Rio de Janeiro",RN:"Rio Grande do Norte",RS:"Rio Grande do Sul",RO:"Rondônia",RR:"Roraima",SC:"Santa Catarina",SP:"São Paulo",SE:"Sergipe",TO:"Tocantins"};
+const wmo = {0:["☀️","Céu limpo"],1:["🌤️","Predominantemente limpo"],2:["⛅","Parcialmente nublado"],3:["☁️","Nublado"],45:["🌫️","Neblina"],48:["🌫️","Neblina com geada"],51:["🌦️","Garoa fraca"],53:["🌦️","Garoa moderada"],55:["🌧️","Garoa intensa"],56:["🌧️","Garoa congelante fraca"],57:["🌧️","Garoa congelante intensa"],61:["🌧️","Chuva fraca"],63:["🌧️","Chuva moderada"],65:["🌧️","Chuva forte"],66:["🌧️","Chuva congelante fraca"],67:["🌧️","Chuva congelante forte"],71:["🌨️","Neve fraca"],73:["🌨️","Neve moderada"],75:["❄️","Neve forte"],77:["🌨️","Grãos de neve"],80:["🌦️","Pancadas fracas"],81:["🌧️","Pancadas moderadas"],82:["⛈️","Pancadas fortes"],85:["🌨️","Pancadas de neve"],86:["❄️","Pancadas fortes de neve"],95:["⛈️","Trovoada"],96:["⛈️","Trovoada com granizo"],99:["⛈️","Trovoada forte com granizo"]};
+let cities=[], selected=null, timer=null, loading=false;
+function showError(msg){$('errorBox').style.display='block';$('errorBox').textContent=msg}
+function clearError(){$('errorBox').style.display='none';$('errorBox').textContent=''}
+function fmt(n,d=1){return Number.isFinite(n)?n.toLocaleString('pt-BR',{maximumFractionDigits:d,minimumFractionDigits:0}):'—'}
+function weather(code){return wmo[code]||["🌦️","Condição variável"]}
+function localTime(s){return new Date(s).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}
+function populateStates(){Object.entries(states).sort((a,b)=>a[1].localeCompare(b[1],'pt-BR')).forEach(([uf,name])=>{let o=document.createElement('option');o.value=uf;o.textContent=name;$('state').append(o)})}
+async function loadCities(){
+ try{
+  const r=await fetch('https://servicodados.ibge.gov.br/api/v1/localidades/municipios?orderBy=nome');
+  if(!r.ok)throw new Error('Não foi possível carregar a lista do IBGE.');
+  const raw=await r.json();
+  cities=raw.map(c=>({name:c.nome,uf:c.microrregiao?.mesorregiao?.UF?.sigla||c['regiao-imediata']?.['regiao-intermediaria']?.UF?.sigla||'',state:c.microrregiao?.mesorregiao?.UF?.nome||'',lat:null,lon:null,ibge:c.id})).filter(c=>c.name);
+  $('loadStatus').textContent=`${cities.length.toLocaleString('pt-BR')} municípios carregados · escolha uma cidade para consultar`;
+  renderSuggestions();renderCityTable();
+  const defaultCity=cities.find(c=>c.name.toLocaleLowerCase('pt-BR')==='são paulo')||cities.find(c=>c.name.toLocaleLowerCase('pt-BR')==='brasília')||cities[0];
+  if(defaultCity){$('search').value=defaultCity.name;$('state').value=defaultCity.uf;await chooseCity(defaultCity.name,defaultCity.uf)}
+ }catch(e){$('loadStatus').textContent='Falha ao carregar municípios';showError('Não foi possível carregar a lista de cidades. Confira sua conexão e recarregue a página. Detalhe: '+e.message)}
+}
+function renderSuggestions(){
+ const uf=$('state').value, q=$('search').value.trim().toLocaleLowerCase('pt-BR');
+ const filtered=cities.filter(c=>(!uf||c.uf===uf)&&(!q||c.name.toLocaleLowerCase('pt-BR').includes(q))).slice(0,120);
+ $('citySuggestions').replaceChildren(...filtered.map(c=>{const o=document.createElement('option');o.value=c.name;o.label=`${c.name} — ${c.uf||'Brasil'}`;return o}));
+}
+async function geocode(name,uf){
+ const query=encodeURIComponent(`${name}, ${states[uf]||uf}, Brasil`);
+ const url=`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(name)}&count=100&language=pt&format=json&countryCode=BR`;
+ const r=await fetch(url);if(!r.ok)throw new Error('Serviço de localização indisponível.');
+ const data=await r.json();const results=data.results||[];
+ let match=results.find(x=>(!uf||x.admin1===states[uf]||x.admin1===uf)&&x.country_code==='BR');
+ if(!match)match=results.find(x=>x.country_code==='BR'&&x.name.toLocaleLowerCase('pt-BR')===name.toLocaleLowerCase('pt-BR'));
+ if(!match)match=results.find(x=>x.country_code==='BR');
+ if(!match)throw new Error('Não encontramos as coordenadas desta cidade. Tente selecionar outra cidade ou estado.');
+ return match;
+}
+async function chooseCity(name,uf){
+ const candidates=cities.filter(c=>c.name.toLocaleLowerCase('pt-BR')===name.toLocaleLowerCase('pt-BR')&&(!uf||c.uf===uf));
+ if(!candidates.length){$('loadStatus').textContent='Selecione uma cidade válida da lista.';return}
+ const city=candidates[0]; selected={name:city.name,uf:city.uf,state:states[city.uf]||city.state};
+ $('cityName').textContent=city.name;$('regionName').textContent=`${states[city.uf]||city.uf} · Brasil`;
+ $('loadStatus').textContent='Buscando condições meteorológicas…';clearError();
+ try{const place=await geocode(city.name,city.uf);selected.lat=place.latitude;selected.lon=place.longitude;selected.admin=place.admin1;await fetchWeather()}
+ catch(e){showError(e.message);$('loadStatus').textContent='Não foi possível atualizar os dados.'}
+}
+async function fetchWeather(){
+ if(!selected||loading)return;loading=true;$('refresh').disabled=true;clearError();
+ try{
+  const base={latitude:selected.lat,longitude:selected.lon,timezone:'America/Sao_Paulo',forecast_days:'7',current:'temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,weather_code,wind_speed_10m',hourly:'temperature_2m,precipitation,probability_of_precipitation,weather_code',daily:'precipitation_sum,precipitation_probability_max,temperature_2m_max,temperature_2m_min,weather_code'};
+  let r,d;
+  // Tenta primeiro a previsão completa; se a API rejeitar algum campo, tenta uma consulta reduzida.
+  for (const fields of [base,{latitude:selected.lat,longitude:selected.lon,timezone:'America/Sao_Paulo',forecast_days:'7',current:'temperature_2m,precipitation,weather_code,wind_speed_10m',hourly:'temperature_2m,precipitation,weather_code',daily:'precipitation_sum,temperature_2m_max,temperature_2m_min,weather_code'}]) {
+    const params=new URLSearchParams(fields);
+    r=await fetch(`https://api.open-meteo.com/v1/forecast?${params}`);
+    if(r.ok){d=await r.json();break;}
+    const detail=await r.text().catch(()=> '');
+    if(fields===base) continue;
+    throw new Error(`API meteorológica HTTP ${r.status}. ${detail.slice(0,180)}`);
+  }
+  if(!d) throw new Error(`Não foi possível consultar a API meteorológica (HTTP ${r?.status||'sem resposta'}). Verifique a internet e tente novamente.`);
+  // Campos opcionais podem não existir na consulta reduzida.
+  d.hourly.probability_of_precipitation ||= d.hourly.time.map(()=>0);
+  d.daily.precipitation_probability_max ||= d.daily.time.map(()=>0);
+  renderWeather(d);$('loadStatus').textContent=`Dados consultados · ${selected.name}/${selected.uf}`;$('updatedAt').textContent='Atualizado às '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+ }catch(e){showError('Não foi possível obter a previsão agora. A página tentará novamente automaticamente. '+e.message);$('loadStatus').textContent='Erro ao consultar dados meteorológicos.'}
+ finally{loading=false;$('refresh').disabled=false}
+}
+function renderWeather(d){
+ const c=d.current,h=d.hourly,day=d.daily;const [ico,desc]=weather(c.weather_code);
+ $('temperature').textContent=`${Math.round(c.temperature_2m)}°`;$('weatherIcon').textContent=ico;$('weatherDesc').textContent=desc;
+ $('rainNow').textContent=fmt(c.precipitation,1);$('rainLabel').textContent=c.precipitation>0?'Precipitação indicada agora':'Sem precipitação indicada agora';
+ const hourKey=c.time.slice(0,13);const currentHourIndex=h.time.findIndex(t=>t.slice(0,13)===hourKey);$('probability').textContent=`${fmt(h.probability_of_precipitation[Math.max(0,currentHourIndex)]??0,0)}%`;
+ $('wind').textContent=`${fmt(c.wind_speed_10m,0)} km/h`;
+ const idx=h.time.findIndex(t=>t>=c.time);const start=idx<0?0:idx;
+ const pastIndex=Math.max(0,start-1);$('lastHour').textContent=`${fmt(h.precipitation[pastIndex]||0)} mm`;
+ const todayIndex=day.time.findIndex(t=>t===c.time.slice(0,10));$('todayRain').textContent=`${fmt(day.precipitation_sum[Math.max(0,todayIndex)]||0)} mm`;
+ const slots=h.time.map((t,i)=>({t,i})).filter(x=>x.t>=c.time).slice(0,8);
+ $('hourly').replaceChildren(...slots.map(({t,i})=>{const [em]=weather(h.weather_code[i]);const el=document.createElement('div');el.className='hour';el.innerHTML=`<div class="time">${new Date(t).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</div><div class="ico">${em}</div><div class="mm">${fmt(h.precipitation[i])} mm</div><div class="degree">${Math.round(h.temperature_2m[i])}°C</div>`;return el}));
+ $('daily').replaceChildren(...day.time.map((t,i)=>{const tr=document.createElement('tr');const date=new Date(t+'T12:00:00');const dayName=i===0?'Hoje':date.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit'});tr.innerHTML=`<td>${dayName}</td><td><strong>${fmt(day.precipitation_sum[i])} mm</strong></td><td>${fmt(day.precipitation_probability_max[i],0)}%</td><td>${Math.round(day.temperature_2m_min[i])}° / ${Math.round(day.temperature_2m_max[i])}°C</td>`;return tr}));
+}
+
+$('search').addEventListener('input',renderSuggestions);
+$('search').addEventListener('change',()=>chooseCity($('search').value.trim(),$('state').value));
+$('search').addEventListener('keydown',e=>{if(e.key==='Enter')chooseCity($('search').value.trim(),$('state').value)});
+$('refresh').addEventListener('click',fetchWeather);
+
+let cityPage=0, pageWeatherCache=new Map(), pageWeatherBusy=false;
+function filteredCities(){
+ const q=$('listSearch')?.value.trim().toLocaleLowerCase('pt-BR')||'';
+ const uf=$('state').value;
+ return cities.filter(c=>(!uf||c.uf===uf)&&(!q||c.name.toLocaleLowerCase('pt-BR').includes(q)));
+}
+function renderCityTable(){
+ if(!$('cityTable')||!cities.length)return;
+ const all=filteredCities(), size=Number($('pageSize').value||20), pages=Math.max(1,Math.ceil(all.length/size));
+ cityPage=Math.min(cityPage,pages-1);
+ const shown=all.slice(cityPage*size,(cityPage+1)*size);
+ $('cityPageInfo').textContent=`${all.length.toLocaleString('pt-BR')} municípios encontrados`;
+ $('pageLabel').textContent=`Página ${cityPage+1} de ${pages}`;
+ $('prevPage').disabled=cityPage===0;$('nextPage').disabled=cityPage>=pages-1;
+ $('cityTable').replaceChildren(...(shown.length?shown.map(c=>{
+  const tr=document.createElement('tr');tr.className='cityRow';
+  const cache=pageWeatherCache.get(c.ibge);
+  const cond=cache?weather(cache.code)[1]:'Clique em “Consultar clima”';
+  const pillClass=cache?(cache.code===0||cache.code===1?'good':([61,63,65,80,81,82,95,96,99].includes(cache.code)?'bad':'mid')):'';
+  tr.innerHTML=`<td><button class="cityName" type="button">${c.name}</button></td><td>${c.uf||'—'}</td><td>${cache?`<span class="conditionPill ${pillClass}">${cond}</span>`:'<span style="color:var(--muted)">—</span>'}</td><td>${cache?`${Math.round(cache.temp)}°C`:'—'}</td><td>${cache?`${fmt(cache.rain)} mm`:'—'}</td><td>${cache?`${fmt(cache.today)} mm`:'—'}</td>`;
+  tr.querySelector('button').addEventListener('click',()=>{$('search').value=c.name;$('state').value=c.uf;chooseCity(c.name,c.uf);window.scrollTo({top:0,behavior:'smooth'})});
+  return tr;
+ }):[Object.assign(document.createElement('tr'),{innerHTML:'<td colspan="6" class="empty">Nenhuma cidade encontrada.</td>'})]));
+}
+async function loadWeatherForPage(){
+ if(pageWeatherBusy)return;const all=filteredCities(),size=Number($('pageSize').value||20),shown=all.slice(cityPage*size,(cityPage+1)*size);
+ if(!shown.length)return;
+ pageWeatherBusy=true;$('loadPageWeather').disabled=true;$('loadPageWeather').textContent='Consultando…';
+ let done=0;
+ try{
+  // Consultas limitadas à página atual para evitar milhares de chamadas simultâneas.
+  for(const city of shown){
+   if(pageWeatherCache.has(city.ibge)){done++;continue}
+   try{
+    const place=await geocode(city.name,city.uf);
+    const params=new URLSearchParams({latitude:place.latitude,longitude:place.longitude,timezone:'America/Sao_Paulo',forecast_days:'1',current:'temperature_2m,precipitation,weather_code',daily:'precipitation_sum'});
+    const r=await fetch(`https://api.open-meteo.com/v1/forecast?${params}`);
+    if(!r.ok)throw new Error('Erro de previsão');
+    const d=await r.json();
+    pageWeatherCache.set(city.ibge,{temp:d.current.temperature_2m,rain:d.current.precipitation,code:d.current.weather_code,today:d.daily.precipitation_sum?.[0]??0});
+   }catch(e){pageWeatherCache.set(city.ibge,{error:true})}
+   done++;$('loadPageWeather').textContent=`Consultando ${done}/${shown.length}…`;renderCityTable();
+  }
+ }finally{pageWeatherBusy=false;$('loadPageWeather').disabled=false;$('loadPageWeather').textContent='Consultar clima desta página';renderCityTable()}
+}
+
+$('listSearch').addEventListener('input',()=>{cityPage=0;renderCityTable()});
+$('pageSize').addEventListener('change',()=>{cityPage=0;renderCityTable()});
+$('prevPage').addEventListener('click',()=>{cityPage=Math.max(0,cityPage-1);renderCityTable()});
+$('nextPage').addEventListener('click',()=>{cityPage++;renderCityTable()});
+$('loadPageWeather').addEventListener('click',loadWeatherForPage);
+$('state').addEventListener('change',()=>{cityPage=0;pageWeatherCache.clear();renderCityTable();renderSuggestions();const exact=cities.find(c=>c.name.toLocaleLowerCase('pt-BR')===$('search').value.trim().toLocaleLowerCase('pt-BR')&&(!$('state').value||c.uf===$('state').value));if(exact)chooseCity(exact.name,exact.uf)});
+populateStates();loadCities();timer=setInterval(fetchWeather,300000);
+</script>
+</body>
+</html>
